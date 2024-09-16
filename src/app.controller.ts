@@ -47,9 +47,10 @@ export class AppController {
       else {
         prevValue = 0
       }
-      console.log(prevValue)
+      
       quoteMap.set(q.author, prevValue+1)
+      console.log(quoteMap)
     });
-    return (quoteMap)
+    return {map: quoteMap}
   }
 }
