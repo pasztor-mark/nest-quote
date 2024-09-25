@@ -1,4 +1,4 @@
-import { Controller, Get, Render, Res } from '@nestjs/common';
+import { Controller, Delete, Get, Param, Render, Query, Res } from '@nestjs/common';
 import { AppService } from './app.service';
 import { Quote, QuoteList } from './quote';
 import { quotes } from './quotes';
@@ -21,14 +21,18 @@ export class AppController {
   }
   @Get('/quotes')
   @Render('quotes')
-  getQuoteList(): any {
-
-    return {
-      quotes: quotes.quotes,
-    }
+  getAllQuotes(@Query('text') text: string) {
+    let foundQuotes = [];
+    quotes.quotes.forEach(q => {
+      if (q.quote.toLowerCase().includes(text)) {
+        foundQuotes.push(q)
+      }
+    });
+    if (!text) return { quotes: quotes.quotes }
+    return { quotes: foundQuotes }
   }
   @Get('/randomQuote')
-  @Render('randomQuote')
+  @Render('oneQuote')
   getRandomQuote() {
     const index = randomInteger(0, quotes.quotes.length - 1)
     return {
@@ -47,10 +51,67 @@ export class AppController {
       else {
         prevValue = 0
       }
-      
-      quoteMap.set(q.author, prevValue+1)
+
+      quoteMap.set(q.author, prevValue + 1)
       console.log(quoteMap)
     });
-    return {map: quoteMap}
+    return { map: quoteMap }
+  }
+  @Get('quotes/:id')
+  @Render('oneQuote')
+  quoteById(@Param('id') quoteId: number) {
+    let foundQuote;
+    quotes.quotes.forEach(q => {
+      if (q.id == quoteId) {
+        foundQuote = q
+      }
+    });
+
+    return {
+      quote: foundQuote
+    }
+  }
+  @Get('delete/:id')
+  @Render('index')
+  deleteQuote(@Param('id') quoteId: number) {
+    let foundQuote;
+    quotes.quotes.forEach(q => {
+      if (q.id == quoteId) {
+        foundQuote = q
+      }
+    })
+    if (!foundQuote) {
+      return {
+        message: "Nincs ilyen id"
+      }
+    }
+    return {
+      message: "Törölve"
+    }
+  }
+  @Get('authorRandom')
+  @Render('authorRandomForm')
+  getRandomAuthor(@Query('author') author: string) {
+    let foundQuotes = [];
+    quotes.quotes.forEach(q => {
+      if (q.author.toLowerCase().includes(author)) {
+        foundQuotes.push(q)
+      }
+    });
+    let quote = foundQuotes[randomInteger(0, foundQuotes.length - 1)]
+    return { quote: quote }
+  }
+  @Get('highlight/:id')
+  @Render('highlight')
+  getHighlight(@Param('id') id: number, @Query('text') text:string) {
+    let fquote;
+    quotes.quotes.forEach(q => {
+      if (q.id == id) {
+        fquote = q
+      }
+    });
+    let quotep1 = fquote.quote.split(text)[0]
+    let quotep2 = fquote.quote.split(text)[1]
+    return { quotep1, highlighted: text, quotep2, author: fquote.author }
   }
 }

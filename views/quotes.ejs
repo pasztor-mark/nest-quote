@@ -6,6 +6,9 @@
   <title>Quote List</title>
 </head>
 <body>
+  <form action="">
+    <input type="text" placeholder="Keresés" name="text" onchange="this.form.submit()">
+  </form>
     <ul>
       <% quotes.forEach(quote => { %>
         <li><blockquote><%= quote.quote%></blockquote><br><sub><%= quote.author %></sub></li>
